@@ -1,5 +1,6 @@
 import { getSupabaseClient } from "./supabase";
 import type { MembershipRow } from "./add-membership";
+import type { Category } from "./vendor-hints";
 
 async function unwrap<T>(
   query: PromiseLike<{ data: T | null; error: { message: string } | null }>
@@ -13,6 +14,7 @@ export type MembershipRecord = {
   id: string;
   email: string;
   activityName: string;
+  category: Category;
   nextDeadline: string;
   cycleDays: number;
   canceledAt: string | null;
@@ -22,6 +24,7 @@ type DbMembershipRow = {
   id: string;
   email: string;
   activity_name: string;
+  category: Category;
   next_deadline: string;
   cycle_days: number;
   canceled_at: string | null;
@@ -32,13 +35,14 @@ function toDomainRecord(row: DbMembershipRow): MembershipRecord {
     id: row.id,
     email: row.email,
     activityName: row.activity_name,
+    category: row.category,
     nextDeadline: row.next_deadline,
     cycleDays: row.cycle_days,
     canceledAt: row.canceled_at,
   };
 }
 
-const SELECT_COLUMNS = "id, email, activity_name, next_deadline, cycle_days, canceled_at";
+const SELECT_COLUMNS = "id, email, activity_name, category, next_deadline, cycle_days, canceled_at";
 
 export async function findTokenByEmail(email: string): Promise<string | null> {
   const supabase = getSupabaseClient();
@@ -55,6 +59,7 @@ export async function insertMembership(row: MembershipRow): Promise<void> {
       token: row.token,
       email: row.email,
       activity_name: row.activityName,
+      category: row.category,
       start_date: row.startDate,
       cycle_days: row.cycleDays,
       notice_days: row.noticeDays,

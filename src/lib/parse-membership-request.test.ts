@@ -4,6 +4,7 @@ import { parseMembershipRequest } from "./parse-membership-request";
 const validBody = {
   email: "parent@example.com",
   activityName: "Emma's gymnastics",
+  category: "kid_activity",
   startDate: "2026-01-01",
   cycleDays: "30",
   noticeDays: "28",
@@ -16,10 +17,17 @@ describe("parseMembershipRequest", () => {
     expect(result).toEqual({
       email: "parent@example.com",
       activityName: "Emma's gymnastics",
+      category: "kid_activity",
       startDate: "2026-01-01",
       cycleDays: 30,
       noticeDays: 28,
     });
+  });
+
+  test("rejects a missing category", () => {
+    expect(() => parseMembershipRequest({ ...validBody, category: "" })).toThrow(
+      "category is required"
+    );
   });
 
   test("rejects a missing email", () => {

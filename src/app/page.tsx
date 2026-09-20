@@ -5,8 +5,9 @@ export default function HomePage() {
     <main>
       <h1>CancelWatch</h1>
       <p>
-        Kid activity memberships auto-renew past their cancellation window.
-        Track the deadline so you don&apos;t get charged again.
+        Gyms, insurance, storage units, kid activities — any membership or
+        contract with a cancellation notice window auto-renews if you miss
+        it. Track the deadline so you don&apos;t get charged again.
       </p>
       <MembershipForm />
     </main>
