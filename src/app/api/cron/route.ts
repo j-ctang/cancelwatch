@@ -13,21 +13,20 @@ export async function GET(request: NextRequest) {
   const today = new Date().toISOString().slice(0, 10);
   const plan = planCronActions(rows, today);
 
-  const rowsById = new Map(rows.map((row) => [row.id, row]));
+  await Promise.all(
+    plan.reminders.map((reminder) =>
+      sendReminderEmail({
+        to: reminder.row.email,
+        activityName: reminder.row.activityName,
+        deadline: reminder.row.nextDeadline,
+        kind: reminder.kind,
+      })
+    )
+  );
 
-  for (const reminder of plan.reminders) {
-    const row = rowsById.get(reminder.id)!;
-    await sendReminderEmail({
-      to: row.email,
-      activityName: row.activityName,
-      deadline: row.nextDeadline,
-      kind: reminder.kind,
-    });
-  }
-
-  for (const rollover of plan.rollovers) {
-    await applyRollover(rollover.id, rollover.newDeadline);
-  }
+  await Promise.all(
+    plan.rollovers.map((rollover) => applyRollover(rollover.id, rollover.newDeadline))
+  );
 
   return NextResponse.json({
     remindersSent: plan.reminders.length,
