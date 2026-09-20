@@ -1,0 +1,36 @@
+import { NextRequest, NextResponse } from "next/server";
+import { planCronActions } from "@/lib/cron-plan";
+import { listActiveMemberships, applyRollover } from "@/lib/memberships-repo";
+import { sendReminderEmail } from "@/lib/send-reminder-email";
+
+export async function GET(request: NextRequest) {
+  const secret = process.env.CRON_SECRET;
+  if (secret && request.headers.get("authorization") !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const rows = await listActiveMemberships();
+  const today = new Date().toISOString().slice(0, 10);
+  const plan = planCronActions(rows, today);
+
+  const rowsById = new Map(rows.map((row) => [row.id, row]));
+
+  for (const reminder of plan.reminders) {
+    const row = rowsById.get(reminder.id)!;
+    await sendReminderEmail({
+      to: row.email,
+      activityName: row.activityName,
+      deadline: row.nextDeadline,
+      kind: reminder.kind,
+    });
+  }
+
+  for (const rollover of plan.rollovers) {
+    await applyRollover(rollover.id, rollover.newDeadline);
+  }
+
+  return NextResponse.json({
+    remindersSent: plan.reminders.length,
+    rolledForward: plan.rollovers.length,
+  });
+}
