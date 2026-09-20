@@ -4,6 +4,7 @@ import { addMembership } from "./add-membership";
 const baseInput = {
   email: "parent@example.com",
   activityName: "Emma's gymnastics",
+  category: "kid_activity" as const,
   startDate: "2026-01-01",
   cycleDays: 30,
   noticeDays: 28,
@@ -26,6 +27,7 @@ describe("addMembership", () => {
       token: "new-token-123",
       email: baseInput.email,
       activityName: baseInput.activityName,
+      category: baseInput.category,
       startDate: baseInput.startDate,
       cycleDays: baseInput.cycleDays,
       noticeDays: baseInput.noticeDays,
@@ -44,5 +46,33 @@ describe("addMembership", () => {
 
     expect(result.token).toBe("existing-token");
     expect(generateToken).not.toHaveBeenCalled();
+  });
+
+  test.each(["kid_activity", "gym", "insurance_utility", "storage_misc"] as const)(
+    "accepts %s as a valid category",
+    async (category) => {
+      const result = await addMembership(
+        { ...baseInput, category },
+        {
+          findTokenByEmail: vi.fn().mockResolvedValue("existing-token"),
+          insertMembership: vi.fn().mockResolvedValue(undefined),
+        }
+      );
+
+      expect(result.token).toBe("existing-token");
+    }
+  );
+
+  test("rejects a category outside the fixed set", async () => {
+    await expect(
+      addMembership(
+        // @ts-expect-error testing invalid input at the runtime boundary
+        { ...baseInput, category: "streaming" },
+        {
+          findTokenByEmail: vi.fn().mockResolvedValue("existing-token"),
+          insertMembership: vi.fn().mockResolvedValue(undefined),
+        }
+      )
+    ).rejects.toThrow("Invalid category");
   });
 });

@@ -1,3 +1,4 @@
+import type { Category } from "./vendor-hints";
 import type { MembershipInput } from "./add-membership";
 
 function parsePositiveNumber(value: unknown, field: string): number {
@@ -25,6 +26,7 @@ export function parseMembershipRequest(body: unknown): MembershipInput {
   return {
     email: parseNonEmptyString(record.email, "email"),
     activityName: parseNonEmptyString(record.activityName, "activityName"),
+    category: parseNonEmptyString(record.category, "category") as Category,
     startDate: parseNonEmptyString(record.startDate, "startDate"),
     cycleDays: parsePositiveNumber(record.cycleDays, "cycleDays"),
     noticeDays: parsePositiveNumber(record.noticeDays, "noticeDays"),

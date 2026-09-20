@@ -3,6 +3,7 @@ create table memberships (
   token text not null,               -- shared across all rows for one email; not unique per row
   email text not null,
   activity_name text not null,
+  category text not null default 'kid_activity',  -- 'kid_activity' | 'gym' | 'insurance_utility' | 'storage_misc', enforced in add-membership.ts
   start_date date not null,
   cycle_days int not null,
   notice_days int not null,

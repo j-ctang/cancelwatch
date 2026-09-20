@@ -15,6 +15,7 @@ export default async function DashboardPage({ params }: { params: Promise<{ toke
         {rows.map((row) => (
           <li key={row.id}>
             <span>{row.activityName}</span>{" "}
+            <span>({row.category})</span>{" "}
             <span>cancel by {row.nextDeadline}</span>{" "}
             <span>({daysRemaining(row.nextDeadline, today)} days left)</span>{" "}
             {row.canceledAt ? (
